@@ -1,0 +1,76 @@
+import os
+import shutil
+
+# Predefined file categories
+FILE_CATEGORIES = {
+    "Documents": [".pdf", ".doc", ".docx", ".txt", ".ppt", ".pptx", ".xls", ".xlsx"],
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp"],
+    "Videos": [".mp4", ".avi", ".mkv", ".mov"],
+    "Audio": [".mp3", ".wav", ".aac"],
+    "Archives": [".zip", ".rar", ".7z"]
+}
+
+def get_category(extension):
+    """Return the category based on file extension."""
+    for category, extensions in FILE_CATEGORIES.items():
+        if extension.lower() in extensions:
+            return category
+    return "Others"
+
+def organize_files(source_directory):
+    """Organize files into category folders."""
+
+    # Check whether directory exists
+    if not os.path.exists(source_directory):
+        print("Directory not found.")
+        return
+
+    total_files = 0
+    moved_files = 0
+    skipped_files = 0
+
+    # Retrieve all files
+    for item in os.listdir(source_directory):
+
+        file_path = os.path.join(source_directory, item)
+
+        # Validate file
+        if os.path.isfile(file_path):
+
+            total_files += 1
+
+            # Extract extension
+            _, extension = os.path.splitext(item)
+
+            # Determine category
+            category = get_category(extension)
+
+            # Create destination folder if needed
+            destination_folder = os.path.join(source_directory, category)
+            os.makedirs(destination_folder, exist_ok=True)
+
+            try:
+                shutil.move(file_path,
+                            os.path.join(destination_folder, item))
+                moved_files += 1
+                print(f"{item}  →  {category}")
+
+            except Exception:
+                skipped_files += 1
+
+    # Generate completion report
+    print("\n========== REPORT ==========")
+    print("Total Files Scanned :", total_files)
+    print("Files Moved         :", moved_files)
+    print("Files Skipped       :", skipped_files)
+    print("Organization Completed Successfully!")
+
+# Main Program
+print("========== AUTOMATED FILE ORGANIZER ==========")
+
+directory = input("Enter Source Directory Path: ").strip()
+
+if directory:
+    organize_files(directory)
+else:
+    print("No directory selected.")
